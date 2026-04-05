@@ -9,30 +9,30 @@ var client = new MongoClient(uri);
 var db;
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
-async function connectDB() {
+app.use(async (req, res, next) => {
   try {
-    await client.connect();
-    db = client.db('roomfix');
-    var admin = await db.collection('users').findOne({ role: 'admin' });
-    if (!admin) {
-      await db.collection('users').insertOne({
-        name: "Admin User",
-        email: "admin@roomfix.com",
-        password: "admin123",
-        sapid: "",
-        role: "admin",
-        room: ""
-      });
-      console.log(' - Default Admin seeded (admin@roomfix.com / admin123)');
+    if (!db) {
+      await client.connect();
+      db = client.db('roomfix');
+      var admin = await db.collection('users').findOne({ role: 'admin' });
+      if (!admin) {
+        await db.collection('users').insertOne({
+          name: "Admin User",
+          email: "admin@roomfix.com",
+          password: "admin123",
+          sapid: "",
+          role: "admin",
+          room: ""
+        });
+        console.log(' - Default Admin seeded');
+      }
     }
-    console.log('----------------------------------');
-    console.log(' RoomFix server started!');
-    console.log(' Open: http://localhost:' + PORT);
-    console.log('----------------------------------');
+    next();
   } catch (err) {
     console.error('Failed to connect to MongoDB:', err);
+    res.status(500).json({ error: 'Database connection error.' });
   }
-}
+});
 app.get('/api/checkEmail', async (req, res) => {
   try {
     var email = req.query.email;
@@ -141,7 +141,7 @@ app.delete('/api/notices/:id', async (req, res) => {
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-connectDB();
+
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
