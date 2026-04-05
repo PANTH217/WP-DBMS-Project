@@ -121,6 +121,18 @@ roomfix/
     ```
 5.  **Access URL**: Navigate to `http://localhost:3000`.
 
+### 3. Deploying to Vercel
+RoomFix is configured to run effortlessly as a serverless application on Vercel.
+
+1.  **Push Code to GitHub**: Ensure your latest code is pushed to your GitHub repository.
+2.  **Sign in to Vercel**: Go to [vercel.com](https://vercel.com) and log in with your GitHub account.
+3.  **Import Project**: Click **Add New > Project** and import your RoomFix repository.
+4.  **Framework Preset**: Vercel should automatically detect **Other**. The `vercel.json` file in the repository will handle the build and routing configurations.
+5.  **Environment Variables**: Before clicking Deploy, expand the **Environment Variables** section.
+    - Name: `MONGODB_URI`
+    - Value: `[Paste your MongoDB connection string here]`
+6.  **Deploy**: Click **Deploy**. Vercel will build and launch your application instantly.
+
 ---
 
 ## 🛡️ Security Best Practices

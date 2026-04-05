@@ -2,8 +2,9 @@ var express = require('express');
 var { MongoClient, ObjectId } = require('mongodb');
 var path = require('path');
 var app = express();
-var PORT = 3000;
-var uri = "mongodb://dhggaming49_db_user:PAN_2517@ac-7hvlxy5-shard-00-00.tjvixh1.mongodb.net:27017,ac-7hvlxy5-shard-00-01.tjvixh1.mongodb.net:27017,ac-7hvlxy5-shard-00-02.tjvixh1.mongodb.net:27017/?ssl=true&replicaSet=atlas-dy5hoi-shard-0&authSource=admin&appName=WPDBMS";
+require('dotenv').config();
+var PORT = process.env.PORT || 3000;
+var uri = process.env.MONGODB_URI || "mongodb://dhggaming49_db_user:PAN_2517@ac-7hvlxy5-shard-00-00.tjvixh1.mongodb.net:27017,ac-7hvlxy5-shard-00-01.tjvixh1.mongodb.net:27017,ac-7hvlxy5-shard-00-02.tjvixh1.mongodb.net:27017/?ssl=true&replicaSet=atlas-dy5hoi-shard-0&authSource=admin&appName=WPDBMS";
 var client = new MongoClient(uri);
 var db;
 app.use(express.json({ limit: '10mb' }));
@@ -141,4 +142,9 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 connectDB();
-app.listen(PORT);
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+module.exports = app;
