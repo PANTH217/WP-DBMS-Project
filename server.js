@@ -30,7 +30,7 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     console.error('Failed to connect to MongoDB:', err);
-    res.status(500).json({ error: 'Database connection error.' });
+    res.status(500).json({ error: 'Database connection error.', details: err.message });
   }
 });
 app.get('/api/checkEmail', async (req, res) => {
