@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html ng-app="roomfixApp">
+<head>
+  <meta charset="UTF-8">
+  <title>RoomFix - Hostel Complaint System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body ng-controller="MainCtrl">
+  <div class="sidebar" ng-show="isLoggedIn">
+    <div class="sidebar-logo">
+      <img src="img/logo.png" alt="RoomFix Logo" class="sidebar-logo-img">
+    </div>
+    <div class="sidebar-welcome">
+      Welcome back,<br>
+      <strong>{{currentUser.name}}</strong>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" ng-show="currentUser.role === 'student'" href="#!/student">
+        Dashboard
+      </a>
+      <a class="sidebar-link" ng-show="currentUser.role === 'student'" href="#!/profile">
+        My Profile
+      </a>
+      <a class="sidebar-link" ng-show="currentUser.role === 'admin'" href="#!/admin">
+        Dashboard
+      </a>
+      <a class="sidebar-link" href="#!/faq">
+        Help & FAQ
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="sidebar-logout" ng-click="logout()">
+        Logout
+      </button>
+    </div>
+  </div>
+  <div ng-class="isLoggedIn ? 'main-area' : 'main-area full-width'">
+    <div ng-view></div>
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-route.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

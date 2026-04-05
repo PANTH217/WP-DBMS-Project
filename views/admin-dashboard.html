@@ -1,0 +1,187 @@
+
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h2>Welcome, {{user.name}}</h2>
+    <p>Manage and resolve student complaints</p>
+  </div>
+  <button ng-click="refresh()" class="btn btn-outline btn-small">Sync</button>
+</div>
+<div class="stat-row">
+  <div class="stat-card">
+    <div class="stat-card-info">
+      <div class="stat-label">Total Complaints</div>
+      <div class="stat-num">{{complaints.length}}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-info">
+      <div class="stat-label">Pending</div>
+      <div class="stat-num" style="color:#92400e;">{{countByStatus('Pending')}}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-info">
+      <div class="stat-label">In Progress</div>
+      <div class="stat-num" style="color:#1e40af;">{{countByStatus('In Progress')}}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-info">
+      <div class="stat-label">Resolved</div>
+      <div class="stat-num" style="color:#15803d;">{{countByStatus('Resolved')}}</div>
+    </div>
+  </div>
+</div>
+<div class="tab-nav">
+  <button class="tab-btn" ng-class="{active: activeTab==='complaints'}" ng-click="switchTab('complaints')">
+    All Complaints <span class="tab-badge">{{complaints.length}}</span>
+  </button>
+  <button class="tab-btn" ng-class="{active: activeTab==='students'}" ng-click="switchTab('students')">
+    Registered Students <span class="tab-badge">{{students.length}}</span>
+  </button>
+  <button class="tab-btn" ng-class="{active: activeTab==='notices'}" ng-click="switchTab('notices')">
+    Campus Announcements
+  </button>
+</div>
+<div ng-show="activeTab==='complaints'">
+  <div class="content-card">
+    <div class="content-card-header">
+      <h3>All Complaints</h3>
+      <div class="filter-bar">
+        <select class="filter-select" ng-model="filterCategory">
+          <option value="">All Categories</option>
+          <option value="Electrical">Electrical</option>
+          <option value="Plumbing">Plumbing</option>
+          <option value="WiFi">WiFi</option>
+          <option value="Furniture">Furniture</option>
+          <option value="Cleaning">Cleaning</option>
+          <option value="Other">Other</option>
+        </select>
+        <select class="filter-select" ng-model="filterStatus">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+      </div>
+    </div>
+    <div class="loading-text" ng-show="loading">Loading complaints...</div>
+    <div class="no-data" ng-show="!loading && getFiltered().length === 0">
+      No complaints found for the selected filters.
+    </div>
+    <div ng-show="!loading && getFiltered().length > 0" class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Room</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Urgency</th>
+            <th>Date</th>
+            <th>Photo</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="c in getFiltered()">
+            <td>{{c.studentName}}</td>
+            <td><strong>{{c.room}}</strong></td>
+            <td>{{c.category}}</td>
+            <td style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{c.description}}</td>
+            <td>
+              <span ng-class="c.urgency === 'High' ? 'priority-high' : (c.urgency === 'Medium' ? 'priority-medium' : 'priority-low')">
+                {{c.urgency}}
+              </span>
+            </td>
+            <td style="white-space:nowrap; color:#aaa;">{{c.submittedAt}}</td>
+            <td>
+              <img ng-show="c.imageData" ng-src="{{c.imageData}}" class="thumb-img"
+                   ng-click="viewImage(c.imageData)" title="Click to view full image" alt="Photo" />
+              <span ng-hide="c.imageData" style="color:#ccc; font-size:12px;">—</span>
+            </td>
+            <td>
+              <span ng-class="c.status === 'Pending' ? 'badge badge-pending' : (c.status === 'In Progress' ? 'badge badge-progress' : 'badge badge-resolved')">
+                {{c.status}}
+              </span>
+            </td>
+            <td>
+              <select class="status-select" ng-model="c.status" ng-change="updateStatus(c)">
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div ng-show="activeTab==='students'">
+  <div class="content-card">
+    <div class="content-card-header">
+      <div>
+        <h3>Registered Students</h3>
+        <p>{{students.length}} student(s) have created an account</p>
+      </div>
+    </div>
+    <div class="loading-text" ng-show="loadingStudents">Loading students...</div>
+    <div class="no-data" ng-show="!loadingStudents && students.length === 0">
+      No students have registered yet.
+    </div>
+    <div ng-show="!loadingStudents && students.length > 0" class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Full Name</th>
+            <th>SAP ID</th>
+            <th>NMIMS Email</th>
+            <th>Room</th>
+            <th>Registered On</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="s in students">
+            <td style="color:#aaa;">{{$index + 1}}</td>
+            <td><strong>{{s.name}}</strong></td>
+            <td style="font-family:monospace; letter-spacing:1px; color:#4361ee;">{{s.sapid || '—'}}</td>
+            <td>{{s.email}}</td>
+            <td>{{s.room}}</td>
+            <td style="color:#aaa;">{{s.registeredAt || '—'}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div ng-show="activeTab==='notices'">
+  <div class="content-card" style="max-width: 600px;">
+    <div class="content-card-header" style="flex-direction: column; align-items: stretch; gap: 16px;">
+      <div>
+        <h3>Publish Announcement</h3>
+        <p>This message will appear at the top of every student's dashboard.</p>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <input type="text" ng-model="newNoticeTitle" placeholder="E.g., Water supply disrupted from 2PM - 4PM" class="form-group" style="flex: 1; padding: 10px 16px; border: 2px solid var(--border-soft); border-radius: var(--radius-sm); font-family: inherit;">
+        <button class="btn btn-primary" ng-click="postNotice()" ng-disabled="!newNoticeTitle" style="padding: 10px 24px;">Publish</button>
+      </div>
+    </div>
+    <div ng-show="notices.length === 0" class="no-data">
+      No active announcements.
+    </div>
+    <div ng-show="notices.length > 0">
+      <div ng-repeat="n in notices" style="padding: 16px 24px; border-top: 1px solid var(--border-soft); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">{{n.date}}</div>
+          <div style="font-size: 15px; color: var(--text-main);">{{n.title}}</div>
+        </div>
+        <button ng-click="deleteNotice(n._id)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px; border-radius: 4px; transition: 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+          Remove
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

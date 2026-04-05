@@ -1,0 +1,35 @@
+
+<div class="auth-wrapper">
+  <div class="auth-card wide">
+    <img src="img/logo.png" alt="RoomFix Logo" class="auth-logo-img">
+    <h2 class="auth-title">Create Account</h2>
+    <p class="auth-subtitle">Register with your NMIMS details</p>
+    <div class="err-msg"     ng-show="error">{{error}}</div>
+    <div class="success-msg" ng-show="message">{{message}}</div>
+    <div class="form-group">
+      <label>Full Name <span style="color:var(--danger);">*</span></label>
+      <input type="text" ng-model="name" ng-change="buildEmail()" placeholder="e.g. Hirav Maru" />
+    </div>
+    <div class="form-group">
+      <label>SAP ID <span style="color:var(--danger);">*</span></label>
+      <input type="text" ng-model="sapid" ng-change="buildEmail()" maxlength="11" placeholder="11-digit SAP ID" />
+      <p class="form-hint">e.g. 70022400120</p>
+    </div>
+    <div class="form-group" ng-show="email">
+      <label>Your NMIMS Email (auto-generated)</label>
+      <div class="email-preview">Email: {{email}}</div>
+    </div>
+    <div class="form-group">
+      <label>Room Number <span style="color:var(--danger);">*</span></label>
+      <input type="text" ng-model="room" placeholder="e.g. B-204" />
+    </div>
+    <div class="form-group">
+      <label>Password (locked to your SAP ID)</label>
+      <input type="password" value="{{sapid}}" class="locked-field" readonly placeholder="Auto-set to SAP ID" />
+    </div>
+    <button class="btn" ng-click="register()" ng-disabled="loading">
+      {{loading ? 'Creating account...' : 'Create Account'}}
+    </button>
+    <p class="link-text">Already have an account? <a href="#!/login">Login here</a></p>
+  </div>
+</div>

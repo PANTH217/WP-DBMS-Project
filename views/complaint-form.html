@@ -1,0 +1,63 @@
+
+<div class="content-card" style="max-width:680px; margin: 0 auto;">
+  <div class="content-card-header">
+    <div>
+      <h3>Submit a Complaint</h3>
+      <p>{{user.name}} &nbsp;|&nbsp; Room: <strong>{{user.room}}</strong></p>
+    </div>
+  </div>
+  <div class="err-msg"     ng-show="error">{{error}}</div>
+  <div class="success-msg" ng-show="message">{{message}}</div>
+  <div class="form-group">
+    <label>Category <span style="color:var(--danger);">*</span></label>
+    <select ng-model="category">
+      <option value="">-- Select Category --</option>
+      <option value="Electrical">Electrical (Fan / Light / Switch)</option>
+      <option value="Plumbing">Plumbing (Tap / Drain / Flush)</option>
+      <option value="WiFi">WiFi / Internet</option>
+      <option value="Furniture">Furniture (Table / Chair / Bed)</option>
+      <option value="Cleaning">Cleaning / Hygiene</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Description <span style="color:var(--danger);">*</span></label>
+    <textarea ng-model="description" placeholder="Describe your complaint in detail..."></textarea>
+  </div>
+  <div class="form-group">
+    <label>Priority <span style="color:var(--danger);">*</span></label>
+    <select ng-model="urgency">
+      <option value="Low">Low – Not urgent, can wait</option>
+      <option value="Medium">Medium – Causing inconvenience</option>
+      <option value="High">High – Needs immediate attention</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>
+      Upload Image <span style="color:var(--danger);">*</span>
+      <span style="font-weight:normal; font-size:12px; color:var(--text-light);">(JPG / PNG, max 2MB)</span>
+    </label>
+    <div class="upload-area" ng-click="openFilePicker()" ng-show="!imagePreview">
+      <p class="upload-text">Click to choose a file</p>
+      <p class="upload-hint">PNG, JPG up to 2MB</p>
+    </div>
+    <div class="preview-area" ng-show="imagePreview">
+      <img ng-src="{{imagePreview}}" class="preview-img" alt="Selected" />
+      <div class="preview-info">
+        <span>{{selectedFile.name}}</span>
+        <button class="remove-btn" ng-click="removeImage()">Remove</button>
+      </div>
+    </div>
+    <input type="file" id="photoUpload" file-input="selectedFile" accept="image/*" style="display:none;" />
+    <div class="err-msg" ng-show="fileError" style="margin-top:8px;">{{fileError}}</div>
+  </div>
+  <div style="display:flex; gap:12px; margin-top:4px;">
+    <button class="btn" ng-click="submit()" ng-disabled="submitting" style="flex:1;">
+      {{submitting ? 'Submitting...' : 'Submit Complaint'}}
+    </button>
+    <a href="#!/student" class="btn btn-outline"
+       style="flex:1; text-align:center; text-decoration:none; display:block; padding:11px 0;">
+      Cancel
+    </a>
+  </div>
+</div>

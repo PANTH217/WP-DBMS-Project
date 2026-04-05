@@ -1,0 +1,26 @@
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <img src="img/logo.png" alt="RoomFix Logo" class="auth-logo-img">
+    <p class="auth-subtitle">Hostel Complaint Management System</p>
+    <div class="err-msg" ng-show="error">{{error}}</div>
+    <div class="form-group">
+      <label>NMIMS Email</label>
+      <input type="email" ng-model="email" placeholder="e.g. hirav.maru120@nmims.in" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" ng-model="password" placeholder="Enter your SAP ID as password" />
+    </div>
+    <button class="btn" ng-click="login()" ng-disabled="loading">
+      {{loading ? 'Logging in...' : 'Login'}}
+    </button>
+    <p class="link-text">New student? <a href="#!/register">Create Account</a></p>
+    <hr class="divider">
+    <div class="info-box">
+      <strong>Demo Credentials:</strong><br>
+      Admin: admin@roomfix.com &nbsp;|&nbsp; Password: admin123<br>
+      Student: your NMIMS email &amp; SAP ID
+    </div>
+  </div>
+</div>
