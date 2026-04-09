@@ -1,0 +1,35 @@
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h2>Registered Students</h2>
+    <p>Directory of students enrolled in the maintenance system.</p>
+  </div>
+  <button ng-click="refresh()" class="btn btn-outline btn-small">Sync</button>
+</div>
+
+<div class="content-card">
+  <div class="content-card-header">
+    <h3>Student Directory</h3>
+  </div>
+  <div class="data-table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Full Name</th>
+          <th>SAP ID</th>
+          <th>NMIMS Email</th>
+          <th>Room No</th>
+          <th>Reg. Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="s in students">
+          <td><strong>{{s.name}}</strong></td>
+          <td>{{s.sapid}}</td>
+          <td>{{s.email}}</td>
+          <td>{{s.room}}</td>
+          <td>{{s.registeredAt}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

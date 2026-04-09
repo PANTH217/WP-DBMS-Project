@@ -10,14 +10,8 @@
   <div class="success-msg" ng-show="message">{{message}}</div>
   <div class="form-group">
     <label>Category <span style="color:var(--danger);">*</span></label>
-    <select ng-model="category">
+    <select ng-model="selectedCategory" ng-options="c.name for c in categories">
       <option value="">-- Select Category --</option>
-      <option value="Electrical">Electrical (Fan / Light / Switch)</option>
-      <option value="Plumbing">Plumbing (Tap / Drain / Flush)</option>
-      <option value="WiFi">WiFi / Internet</option>
-      <option value="Furniture">Furniture (Table / Chair / Bed)</option>
-      <option value="Cleaning">Cleaning / Hygiene</option>
-      <option value="Other">Other</option>
     </select>
   </div>
   <div class="form-group">

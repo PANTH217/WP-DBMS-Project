@@ -1,4 +1,3 @@
-
 <div class="page-header">
   <h2>Dashboard</h2>
   <p>Overview of your complaints</p>
@@ -25,8 +24,7 @@
 </div>
 <div class="notice-alert" ng-show="notices.length > 0">
   <div class="notice-header">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-    <strong>Campus Announcements</strong>
+    <strong>Campus Notices</strong>
   </div>
   <div ng-repeat="n in notices" style="padding: 12px 16px; border-top: 1px solid rgba(0,0,0,0.05); font-size: 14px;">
     <span style="color: var(--text-muted); font-size: 12px; margin-right: 12px; font-weight: 600;">{{n.date}}</span>
@@ -56,7 +54,7 @@
   </div>
   <div class="loading-text" ng-show="loading">Loading your complaints...</div>
   <div class="no-data" ng-show="!loading && getFiltered().length === 0">
-    No complaints yet. Click <strong>"+ New Complaint"</strong> to submit one.
+    No complaints yet. Click <strong>"+ New Complaint"</strong> icon to submit one.
   </div>
   <div ng-show="!loading && getFiltered().length > 0" class="data-table-wrapper">
     <table class="data-table">
@@ -88,7 +86,26 @@
             <span ng-hide="c.imageData" style="color:#ccc; font-size:12px;">—</span>
           </td>
           <td>
-            <span ng-class="c.status === 'Pending' ? 'badge badge-pending' : (c.status === 'In Progress' ? 'badge badge-progress' : 'badge badge-resolved')">
+            <div ng-if="c.status === 'Resolved' && !hasFeedback(c._id)">
+              <div style="font-size: 11px; color: #888; margin-bottom: 4px;">Rate Service:</div>
+              <div style="display:flex; gap: 5px;">
+                <select ng-model="c.tempRating" style="padding: 2px 5px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px;">
+                  <option value="">--</option>
+                  <option value="5">5 - Excellent</option>
+                  <option value="4">4 - Good</option>
+                  <option value="3">3 - Average</option>
+                  <option value="2">2 - Poor</option>
+                  <option value="1">1 - Very Poor</option>
+                </select>
+                <button class="btn btn-small btn-primary" style="padding: 2px 8px; font-size: 11px;" ng-click="submitRating(c, c.tempRating)">
+                  Rate
+                </button>
+              </div>
+            </div>
+            <div ng-if="hasFeedback(c._id)" style="color: #10b981; font-weight: 600; font-size: 13px;">
+              Rated
+            </div>
+            <span ng-if="c.status !== 'Resolved'" ng-class="c.status === 'Pending' ? 'badge badge-pending' : 'badge badge-progress'">
               {{c.status}}
             </span>
           </td>
@@ -97,3 +114,4 @@
     </table>
   </div>
 </div>
+v>

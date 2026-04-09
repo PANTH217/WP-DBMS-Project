@@ -36,7 +36,7 @@ roomfix/
 ├── js/
 │   └── app.js               # Core AngularJS logic (Module, Config, Service, Controllers)
 ├── views/                   # HTML Templates for dynamic loading
-│   ├── admin-dashboard.html # Admin portal for managing complaints & announcements
+│   ├── admin-dashboard.html # Admin portal for managing complaints & notices
 │   ├── complaint-form.html  # Student interface for filing new maintenance requests
 │   ├── faq.html             # Support & Help documentation
 │   ├── login.html           # Professional login interface
@@ -90,7 +90,7 @@ roomfix/
 | `/api/complaints` | `POST` | Submits a new maintenance request. |
 | `/api/complaints/:id` | `PUT` | Updates the status of a specific complaint (Admin). |
 | `/api/students` | `GET` | Lists all registered students (Admin). |
-| `/api/notices` | `GET` | Returns all active announcements. |
+| `/api/notices` | `GET` | Returns all active notices. |
 | `/api/notices` | `POST` | Publishes a new announcement (Admin). |
 | `/api/notices/:id` | `DELETE` | Removes an announcement (Admin). |
 

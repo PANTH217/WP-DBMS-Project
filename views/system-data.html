@@ -1,0 +1,79 @@
+
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h2>System Data Inventory</h2>
+    <p>Comprehensive overview of hostel resources and DBMS records.</p>
+  </div>
+  <button ng-click="refresh()" class="btn btn-outline btn-small">Sync Records</button>
+</div>
+
+<div class="stat-row" style="margin-bottom: 30px;">
+  <div class="stat-card" style="flex:1; border-top: 4px solid #4361ee;">
+    <div>
+      <div class="stat-label">Hostel Blocks</div>
+      <div class="stat-num">{{hostels.length}}</div>
+      <div style="font-size: 12px; color: #64748b; margin-top: 10px;">
+        <div ng-repeat="h in hostels" style="padding: 2px 0;">• {{h.name}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="stat-card" style="flex:1; border-top: 4px solid #10b981;">
+    <div>
+      <div class="stat-label">Total Rooms</div>
+      <div class="stat-num">{{rooms.length}}</div>
+      <p style="font-size: 12px; color: #64748b; margin-top: 10px;">
+        Ground Floor: 32 rooms<br>
+        Floors 1-3: 68 rooms each<br>
+        <span style="color: #10b981; font-weight: 600;">Capacity: 4 per room</span>
+      </p>
+    </div>
+  </div>
+  <div class="stat-card" style="flex:1; border-top: 4px solid #f59e0b;">
+    <div>
+      <div class="stat-label">Staff Count</div>
+      <div class="stat-num">{{staff.length}}</div>
+      <div style="font-size: 12px; color: #64748b; margin-top: 10px;">
+        <div ng-repeat="s in staff" style="padding: 2px 0;">• {{s.name}} ({{s.phone}})</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content-card">
+  <div class="content-card-header">
+    <div>
+      <h3>Inventory Tracking</h3>
+      <p>Live stock levels for maintenance supplies</p>
+    </div>
+  </div>
+  <div class="data-table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Item Name</th>
+          <th>Category</th>
+          <th>Stock Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="i in inventory">
+          <td><strong>{{i.itemName}}</strong></td>
+          <td><span class="badge" style="background: #f1f5f9; color: #475569;">{{i.categoryId}}</span></td>
+          <td>
+            <div style="font-weight: 600; font-size: 16px; color: #1e293b;">
+              {{i.quantity}} <span style="font-size: 12px; color: #64748b; font-weight: 400;">units</span>
+            </div>
+          </td>
+          <td style="display: flex; gap: 8px;">
+            <button class="btn btn-small btn-outline" ng-click="reorderItem(i)">Reorder</button>
+            <button class="btn btn-small btn-primary" ng-click="useItem(i)" ng-disabled="i.quantity <= 0">Used -1</button>
+          </td>
+        </tr>
+        <tr ng-if="inventory.length === 0">
+          <td colspan="4" style="text-align: center; color: #888; padding: 40px;">No inventory data available in database.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

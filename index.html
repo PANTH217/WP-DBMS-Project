@@ -21,11 +21,23 @@
       <a class="sidebar-link" ng-show="currentUser.role === 'student'" href="#!/profile">
         My Profile
       </a>
-      <a class="sidebar-link" ng-show="currentUser.role === 'admin'" href="#!/admin">
-        Dashboard
+      <a class="sidebar-link" ng-show="currentUser.role === 'admin'" href="#!/admin/complaints">
+        Complaints
+      </a>
+      <a class="sidebar-link" ng-show="currentUser.role === 'admin'" href="#!/admin/students">
+        Registered Students
+      </a>
+      <a class="sidebar-link" ng-show="currentUser.role === 'admin'" href="#!/admin/notices">
+        Manage Notices
+      </a>
+      <a class="sidebar-link" ng-show="currentUser.role === 'admin'" href="#!/admin/staff">
+        Manage Staff
       </a>
       <a class="sidebar-link" href="#!/faq">
         Help & FAQ
+      </a>
+      <a class="sidebar-link" ng-show="currentUser.role === 'admin'" href="#!/admin/system">
+        System Data (DBMS)
       </a>
     </nav>
     <div class="sidebar-footer">

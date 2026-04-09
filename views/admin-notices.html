@@ -1,0 +1,42 @@
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h2>Manage Campus Notices</h2>
+    <p>Broadcast alerts and updates to all students.</p>
+  </div>
+  <button ng-click="refresh()" class="btn btn-outline btn-small">Sync</button>
+</div>
+
+<div class="content-card" style="max-width: 800px;">
+  <div class="content-card-header" style="flex-direction: column; align-items: flex-start;">
+    <h3>Post New Notice</h3>
+    <p style="margin-bottom: 20px;">Publish and remove campus-wide alerts.</p>
+
+    <div style="display: flex; gap: 12px; width: 100%;">
+      <input type="text" ng-model="newNoticeTitle" placeholder="Type notice message here..."
+        style="flex: 1; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s;"
+        onfocus="this.style.borderColor='#4361ee'" onblur="this.style.borderColor='#e2e8f0'">
+      <button class="btn btn-primary" ng-click="postNotice()" ng-disabled="!newNoticeTitle"
+        style="width: auto; padding: 0 32px;">
+        Post Notice
+      </button>
+    </div>
+  </div>
+
+  <div ng-show="notices.length === 0" class="no-data" style="padding: 40px; text-align: center; color: #888;">
+    No active notices.
+  </div>
+
+  <div ng-repeat="n in notices"
+    style="padding: 16px 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;"
+    onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+    <div>
+      <div style="font-size: 12px; color: #94a3b8; font-weight: 600; margin-bottom: 4px;">{{n.date}}</div>
+      <div style="font-size: 15px; color: #1e293b;">{{n.title}}</div>
+    </div>
+    <button ng-click="deleteNotice(n._id)"
+      style="color: #ef4444; background: #fee2e2; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;"
+      onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
+      Remove
+    </button>
+  </div>
+</div>

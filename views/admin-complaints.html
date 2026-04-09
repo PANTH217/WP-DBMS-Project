@@ -1,0 +1,99 @@
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h2>Welcome, {{user.name}}</h2>
+    <p>Manage and resolve student complaints</p>
+  </div>
+  <button ng-click="refresh()" class="btn btn-outline btn-small">Sync</button>
+</div>
+
+<div class="stat-row">
+  <div class="stat-card">
+    <div class="stat-card-info">
+      <div class="stat-label">Total Complaints</div>
+      <div class="stat-num">{{complaints.length}}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-info">
+      <div class="stat-label">Pending</div>
+      <div class="stat-num" style="color:#92400e;">{{countByStatus('Pending')}}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-info">
+      <div class="stat-label">In Progress</div>
+      <div class="stat-num" style="color:#1e40af;">{{countByStatus('In Progress')}}</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-info">
+      <div class="stat-label">Resolved</div>
+      <div class="stat-num" style="color:#15803d;">{{countByStatus('Resolved')}}</div>
+    </div>
+  </div>
+</div>
+
+<div class="content-card">
+  <div class="content-card-header">
+    <h3>All Complaints</h3>
+    <div class="filter-bar">
+      <select class="filter-select" ng-model="filterCategory">
+        <option value="">All Categories</option>
+        <option ng-repeat="cat in categories" value="{{cat.name}}">{{cat.name}}</option>
+      </select>
+      <select class="filter-select" ng-model="filterStatus">
+        <option value="">All Status</option>
+        <option value="Pending">Pending</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+      </select>
+    </div>
+  </div>
+  <div class="loading-text" ng-show="loading">Loading complaints...</div>
+  <div ng-show="!loading" class="data-table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Room</th>
+          <th>Category</th>
+          <th>Summary</th>
+          <th>Urgency</th>
+          <th>Assign Staff</th>
+          <th>Feedback</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="c in getFiltered()">
+          <td>{{c.studentName}}</td>
+          <td><strong>{{c.room}}</strong></td>
+          <td>{{c.category}}</td>
+          <td title="{{c.description}}">{{c.description | limitTo: 20}}...</td>
+          <td>
+            <span ng-class="c.urgency === 'High' ? 'priority-high' : 'priority-low'">{{c.urgency}}</span>
+          </td>
+          <td>
+            <select class="status-select" ng-model="c.staffId" ng-change="assignStaff(c, c.staffId)">
+              <option value="">Assign Worker</option>
+              <option ng-repeat="s in staff" value="{{s._id}}">{{s.name}}</option>
+            </select>
+          </td>
+          <td>
+            <div ng-if="getFeedbackForComplaint(c._id)" class="feedback-badge">
+              Rating: {{getFeedbackForComplaint(c._id).rating}}/5
+            </div>
+            <span ng-if="!getFeedbackForComplaint(c._id)" style="color:#ccc;">None</span>
+          </td>
+          <td>
+            <select class="status-select" ng-model="c.status" ng-change="updateStatus(c)">
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

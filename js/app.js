@@ -19,8 +19,7 @@ app.config(['$routeProvider', function($routeProvider) {
       controller: 'ComplaintFormCtrl'
     })
     .when('/admin', {
-      templateUrl: 'views/admin-dashboard.html',
-      controller: 'AdminCtrl'
+      redirectTo: '/admin/complaints'
     })
     .when('/profile', {
       templateUrl: 'views/profile.html',
@@ -29,6 +28,26 @@ app.config(['$routeProvider', function($routeProvider) {
     .when('/faq', {
       templateUrl: 'views/faq.html',
       controller: 'FAQCtrl'
+    })
+    .when('/admin/complaints', {
+      templateUrl: 'views/admin-complaints.html',
+      controller: 'AdminCtrl'
+    })
+    .when('/admin/students', {
+      templateUrl: 'views/admin-students.html',
+      controller: 'AdminCtrl'
+    })
+    .when('/admin/notices', {
+      templateUrl: 'views/admin-notices.html',
+      controller: 'AdminCtrl'
+    })
+    .when('/admin/staff', {
+      templateUrl: 'views/admin-staff.html',
+      controller: 'AdminCtrl'
+    })
+    .when('/admin/system', {
+      templateUrl: 'views/system-data.html',
+      controller: 'AdminCtrl'
     })
     .otherwise({
       redirectTo: '/login'
@@ -83,7 +102,27 @@ app.service('DataService', ['$http', function($http) {
   this.deleteNotice = function(id) {
     return $http.delete('/api/notices/' + id);
   };
+
+
+  this.getHostels = function() { return $http.get('/api/hostels').then(function(res) { return res.data; }); };
+  this.getRooms = function() { return $http.get('/api/rooms').then(function(res) { return res.data; }); };
+  this.getCategories = function() { return $http.get('/api/categories').then(function(res) { return res.data; }); };
+  this.getStaff = function() { return $http.get('/api/staff').then(function(res) { return res.data; }); };
+  this.addStaff = function(data) { return $http.post('/api/staff', data); };
+  this.deleteStaff = function(id) { return $http.delete('/api/staff/' + id); };
+  this.getAssignments = function() { return $http.get('/api/assignments').then(function(res) { return res.data; }); };
+  this.addAssignment = function(data) { return $http.post('/api/assignments', data); };
+  this.getFeedback = function() { return $http.get('/api/feedback').then(function(res) { return res.data; }); };
+  this.addFeedback = function(data) { return $http.post('/api/feedback', data); };
+  this.getInventory = function() { return $http.get('/api/inventory').then(function(res) { return res.data; }); };
+  this.updateComplaintStatus = function(id, status) {
+    return $http.put('/api/complaints/' + id, { status: status });
+  };
+  this.updateInventory = function(id, quantity) {
+    return $http.put('/api/inventory/' + id, { quantity: quantity });
+  };
 }]);
+
 app.controller('MainCtrl', ['$scope', '$rootScope', '$location', function($scope, $rootScope, $location) {
   var saved = localStorage.getItem('roomfix_user');
   $rootScope.currentUser = saved ? JSON.parse(saved) : null;
@@ -139,11 +178,18 @@ app.controller('LoginCtrl', ['$scope', '$location', '$rootScope', 'DataService',
 app.controller('RegisterCtrl', ['$scope', '$location', 'DataService', function($scope, $location, DataService) {
   $scope.name    = '';
   $scope.sapid   = '';
-  $scope.room    = '';
+  $scope.hostels = [];
+  $scope.rooms   = [];
+  $scope.selectedHostel = null;
+  $scope.selectedRoom   = null;
   $scope.email   = '';
   $scope.error   = '';
   $scope.message = '';
   $scope.loading = false;
+
+  DataService.getHostels().then(function(list) { $scope.hostels = list; });
+  DataService.getRooms().then(function(list) { $scope.rooms = list; });
+
   $scope.buildEmail = function() {
     var name  = ($scope.name  || '').trim();
     var sapid = ($scope.sapid || '').trim();
@@ -161,10 +207,11 @@ app.controller('RegisterCtrl', ['$scope', '$location', 'DataService', function($
       $scope.email = firstName + last3 + '@nmims.in';
     }
   };
+
   $scope.register = function() {
     $scope.error   = '';
     $scope.message = '';
-    if (!$scope.name || !$scope.sapid || !$scope.room) {
+    if (!$scope.name || !$scope.sapid || !$scope.selectedRoom) {
       $scope.error = 'All fields are required.';
       return;
     }
@@ -186,7 +233,9 @@ app.controller('RegisterCtrl', ['$scope', '$location', 'DataService', function($
         name:     $scope.name,
         email:    $scope.email,
         sapid:    $scope.sapid,
-        room:     $scope.room,
+        room:     $scope.selectedRoom.roomNo,
+        roomId:   $scope.selectedRoom._id,
+        hostelId: $scope.selectedRoom.hostelId,
         password: $scope.sapid,
         role:     'student',
         registeredAt: new Date().toLocaleDateString('en-IN')
@@ -206,6 +255,7 @@ app.controller('RegisterCtrl', ['$scope', '$location', 'DataService', function($
     });
   };
 }]);
+
 app.controller('StudentCtrl', ['$scope', '$location', 'DataService', function($scope, $location, DataService) {
   var user = JSON.parse(localStorage.getItem('roomfix_user'));
   if (!user || user.role !== 'student') {
@@ -215,38 +265,65 @@ app.controller('StudentCtrl', ['$scope', '$location', 'DataService', function($s
   $scope.user         = user;
   $scope.complaints   = [];
   $scope.notices      = [];
+  $scope.feedbacks    = [];
   $scope.loading      = true;
   $scope.filterStatus = '';
+
+  $scope.assignments  = [];
   $scope.refresh = function() {
     $scope.loading = true;
     DataService.getComplaints(user.room).then(function(list) {
       $scope.complaints = list;
       $scope.loading    = false;
-    }).catch(function() {
-      $scope.loading = false;
     });
-    DataService.getNotices().then(function(notices) {
-      $scope.notices = notices;
-    });
+    DataService.getNotices().then(function(notices) { $scope.notices = notices; });
+    DataService.getFeedback().then(function(list) { $scope.feedbacks = list; });
+    DataService.getAssignments().then(function(list) { $scope.assignments = list; });
   };
   $scope.refresh();
+
+  $scope.hasFeedback = function(complaintId) {
+    return $scope.feedbacks.some(function(f) { return f.complaintId === complaintId; });
+  };
+
+  $scope.submitRating = function(complaint, rating) {
+    if (!rating) {
+      alert('Please select a rating value.');
+      return;
+    }
+
+    var assignment = $scope.assignments.find(function(a) { return a.complaintId === complaint._id; });
+    var staffId = assignment ? assignment.staffId : null;
+
+    DataService.addFeedback({
+      complaintId: complaint._id,
+      staffId: staffId,
+      rating: parseInt(rating),
+      studentName: user.name,
+      comment: 'Resolved successfully'
+    }).then(function() {
+      alert('Thank you for your feedback!');
+      $scope.refresh();
+    });
+  };
+
   $scope.getFiltered = function() {
     if (!$scope.filterStatus) return $scope.complaints;
-    return $scope.complaints.filter(function(c) {
-      return c.status === $scope.filterStatus;
-    });
+    return $scope.complaints.filter(function(c) { return c.status === $scope.filterStatus; });
   };
   $scope.countByStatus = function(status) {
     return $scope.complaints.filter(function(c) { return c.status === status; }).length;
   };
 }]);
+
 app.controller('ComplaintFormCtrl', ['$scope', '$location', 'DataService', function($scope, $location, DataService) {
   var user = JSON.parse(localStorage.getItem('roomfix_user'));
   if (!user || user.role !== 'student') {
     $location.path('/login');
     return;
   }
-  $scope.category     = '';
+  $scope.categories   = [];
+  $scope.selectedCategory = null;
   $scope.description  = '';
   $scope.urgency      = 'Low';
   $scope.error        = '';
@@ -255,6 +332,9 @@ app.controller('ComplaintFormCtrl', ['$scope', '$location', 'DataService', funct
   $scope.selectedFile = null;
   $scope.imagePreview = null;
   $scope.fileError    = '';
+
+  DataService.getCategories().then(function(list) { $scope.categories = list; });
+
   $scope.openFilePicker = function() {
     document.getElementById('photoUpload').click();
   };
@@ -290,7 +370,7 @@ app.controller('ComplaintFormCtrl', ['$scope', '$location', 'DataService', funct
   });
   $scope.submit = function() {
     $scope.error = '';
-    if (!$scope.category || !$scope.description) {
+    if (!$scope.selectedCategory || !$scope.description) {
       $scope.error = 'Please fill in category and description.';
       return;
     }
@@ -305,7 +385,10 @@ app.controller('ComplaintFormCtrl', ['$scope', '$location', 'DataService', funct
       studentName:  user.name,
       email:        user.email,
       room:         user.room,
-      category:     $scope.category,
+      roomId:       user.roomId,
+      hostelId:     user.hostelId,
+      categoryId:   $scope.selectedCategory._id,
+      category:     $scope.selectedCategory.name,
       description:  $scope.description,
       urgency:      $scope.urgency,
       status:       'Pending',
@@ -315,7 +398,7 @@ app.controller('ComplaintFormCtrl', ['$scope', '$location', 'DataService', funct
     }).then(function() {
       $scope.submitting   = false;
       $scope.message      = 'Complaint submitted successfully!';
-      $scope.category     = '';
+      $scope.selectedCategory = null;
       $scope.description  = '';
       $scope.urgency      = 'Low';
       $scope.selectedFile = null;
@@ -330,6 +413,7 @@ app.controller('ComplaintFormCtrl', ['$scope', '$location', 'DataService', funct
     });
   };
 }]);
+
 app.controller('AdminCtrl', ['$scope', '$location', 'DataService', function($scope, $location, DataService) {
   var user = JSON.parse(localStorage.getItem('roomfix_user'));
   if (!user || user.role !== 'admin') {
@@ -340,52 +424,141 @@ app.controller('AdminCtrl', ['$scope', '$location', 'DataService', function($sco
   $scope.complaints     = [];
   $scope.students       = [];
   $scope.notices        = [];
+  $scope.staff          = [];
+  $scope.rooms          = [];
+  $scope.hostels        = [];
+  $scope.categories     = [];
+  $scope.inventory      = [];
+  $scope.assignments    = [];
+  $scope.feedback       = [];
+  
   $scope.newNoticeTitle = '';
   $scope.loading        = true;
-  $scope.loadingStudents = true;
-  $scope.filterCategory = '';
-  $scope.filterStatus   = '';
   $scope.activeTab      = 'complaints';
+  
   $scope.refresh = function() {
     $scope.loading = true;
-    DataService.getComplaints(null).then(function(list) {
-      $scope.complaints = list;
-      $scope.loading    = false;
-    }).catch(function() {
-      $scope.loading = false;
-    });
-    $scope.loadingStudents = true;
-    DataService.getStudents().then(function(list) {
-      $scope.students        = list;
-      $scope.loadingStudents = false;
-    }).catch(function() {
-      $scope.loadingStudents = false;
-    });
-    DataService.getNotices().then(function(list) {
-      $scope.notices = list;
+    
+
+    var pComplaints  = DataService.getComplaints(null);
+    var pAssignments = DataService.getAssignments();
+    var pStudents    = DataService.getStudents();
+    var pNotices     = DataService.getNotices();
+    var pStaff       = DataService.getStaff();
+    var pRooms       = DataService.getRooms();
+    var pHostels     = DataService.getHostels();
+    var pCategories  = DataService.getCategories();
+    var pInventory   = DataService.getInventory();
+    var pFeedback    = DataService.getFeedback();
+
+    Promise.all([
+      pComplaints, pAssignments, pStudents, pNotices, pStaff, 
+      pRooms, pHostels, pCategories, pInventory, pFeedback
+    ]).then(function(results) {
+      $scope.$apply(function() {
+        var complaints = results[0];
+        var assignments = results[1];
+        
+
+        complaints.forEach(function(c) {
+          var a = assignments.find(function(ass) { return ass.complaintId === c._id; });
+          if (a) c.staffId = a.staffId;
+        });
+
+        $scope.complaints  = complaints;
+        $scope.assignments = assignments;
+        $scope.students    = results[2];
+        $scope.notices     = results[3];
+        $scope.staff       = results[4];
+        $scope.rooms       = results[5];
+        $scope.hostels     = results[6];
+        $scope.categories  = results[7];
+        $scope.inventory   = results[8];
+        $scope.feedback    = results[9];
+        
+
+        $scope.staff.forEach(function(s) {
+          var staffFeedbacks = $scope.feedback.filter(function(f) { return f.staffId === s._id; });
+          if (staffFeedbacks.length > 0) {
+            var sum = staffFeedbacks.reduce(function(acc, f) { return acc + (f.rating || 0); }, 0);
+            s.avgRating = (sum / staffFeedbacks.length).toFixed(1);
+          } else {
+            s.avgRating = 'N/A';
+          }
+        });
+
+        $scope.loading = false;
+      });
+    }).catch(function(err) {
+      console.error("Data load failed:", err);
+      $scope.$apply(function() { $scope.loading = false; });
     });
   };
+
+  $scope.assignStaff = function(complaint, staffId) {
+    if (!staffId) return;
+    DataService.addAssignment({
+      complaintId: complaint._id,
+      staffId: staffId,
+      assignedAt: new Date().toLocaleString()
+    }).then(function() {
+
+      return DataService.updateComplaintStatus(complaint._id, 'In Progress');
+    }).then(function() {
+      alert('Technician assigned successfully! Status updated to In Progress.');
+      $scope.refresh();
+    });
+  };
+
+  $scope.getStaffName = function(staffId) {
+    var s = $scope.staff.find(function(item) { return item._id === staffId; });
+    return s ? s.name : 'Unassigned';
+  };
+
+  $scope.getFeedbackForComplaint = function(complaintId) {
+    return $scope.feedback.find(function(f) { return f.complaintId === complaintId; });
+  };
+
   $scope.postNotice = function() {
     if (!$scope.newNoticeTitle) return;
     var today = new Date();
     var dateStr = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
-    DataService.addNotice({
-      title: $scope.newNoticeTitle,
-      date: dateStr
-    }).then(function() {
+    DataService.addNotice({ title: $scope.newNoticeTitle, date: dateStr }).then(function() {
       $scope.newNoticeTitle = '';
       $scope.refresh();
     });
   };
-  $scope.deleteNotice = function(id) {
-    if (confirm('Are you sure you want to delete this notice?')) {
-      DataService.deleteNotice(id).then(function() {
+
+  $scope.newStaff = { name: '', phone: '', specialization: '' };
+  $scope.addStaff = function() {
+    if (!$scope.newStaff.name || !$scope.newStaff.phone || !$scope.newStaff.specialization) {
+      alert('Please fill all staff details.');
+      return;
+    }
+    DataService.addStaff($scope.newStaff).then(function() {
+      $scope.newStaff = { name: '', phone: '', specialization: '' };
+      alert('New staff recruited successfully!');
+      $scope.refresh();
+    });
+  };
+
+  $scope.removeStaff = function(id) {
+    if (confirm('Are you sure you want to remove this staff member?')) {
+      DataService.deleteStaff(id).then(function() {
         $scope.refresh();
       });
     }
   };
+
+  $scope.deleteNotice = function(id) {
+    if (confirm('Are you sure you want to delete this notice?')) {
+      DataService.deleteNotice(id).then(function() { $scope.refresh(); });
+    }
+  };
+
   $scope.refresh();
   $scope.switchTab = function(tab) { $scope.activeTab = tab; };
+  
   $scope.getFiltered = function() {
     return $scope.complaints.filter(function(c) {
       var catOk  = !$scope.filterCategory || c.category === $scope.filterCategory;
@@ -393,22 +566,40 @@ app.controller('AdminCtrl', ['$scope', '$location', 'DataService', function($sco
       return catOk && statOk;
     });
   };
+
   $scope.countByStatus = function(status) {
     return $scope.complaints.filter(function(c) { return c.status === status; }).length;
   };
+
   $scope.getBadgeClass = function(status) {
     if (status === 'Pending')     return 'badge badge-pending';
     if (status === 'In Progress') return 'badge badge-progress';
     if (status === 'Resolved')    return 'badge badge-resolved';
     return 'badge';
   };
+
   $scope.updateStatus = function(complaint) {
     if (!complaint.status) return;
-    DataService.updateStatus(complaint._id, complaint.status).then(function() {
-    }).catch(function() {
-      alert('Status update failed. Please try again.');
+    DataService.updateComplaintStatus(complaint._id, complaint.status);
+  };
+
+  $scope.reorderItem = function(item) {
+    var fullStock = 100;
+    DataService.updateInventory(item._id, fullStock).then(function() {
+      item.quantity = fullStock;
+      alert('Stock replenished successfully!');
     });
   };
+
+  $scope.useItem = function(item) {
+    if (item.quantity > 0) {
+      var newQty = item.quantity - 1;
+      DataService.updateInventory(item._id, newQty).then(function() {
+        item.quantity = newQty;
+      });
+    }
+  };
+
   $scope.viewImage = function(imageData) {
     var w = window.open();
     w.document.write('<html><body style="margin:0; background:#222; text-align:center;">');
@@ -417,13 +608,29 @@ app.controller('AdminCtrl', ['$scope', '$location', 'DataService', function($sco
     w.document.close();
   };
 }]);
-app.controller('ProfileCtrl', ['$scope', '$location', function($scope, $location) {
+
+app.controller('ProfileCtrl', ['$scope', '$location', 'DataService', function($scope, $location, DataService) {
   var user = JSON.parse(localStorage.getItem('roomfix_user'));
   if (!user) {
     $location.path('/login');
     return;
   }
   $scope.user = user;
+  $scope.rating = 5;
+  $scope.comment = '';
+
+  $scope.submitFeedback = function(complaint) {
+    DataService.addFeedback({
+      complaintId: complaint._id,
+      rating: $scope.rating,
+      comment: $scope.comment,
+      studentName: user.name
+    }).then(function() {
+      alert('Feedback submitted! Thank you.');
+      complaint.hasFeedback = true;
+    });
+  };
 }]);
+
 app.controller('FAQCtrl', ['$scope', function($scope) {
 }]);

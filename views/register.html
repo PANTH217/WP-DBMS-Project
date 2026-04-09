@@ -20,8 +20,16 @@
       <div class="email-preview">Email: {{email}}</div>
     </div>
     <div class="form-group">
+      <label>Hostel Block <span style="color:var(--danger);">*</span></label>
+      <select ng-model="selectedHostel" ng-options="h.name for h in hostels">
+        <option value="">-- Select Hostel --</option>
+      </select>
+    </div>
+    <div class="form-group" ng-show="selectedHostel">
       <label>Room Number <span style="color:var(--danger);">*</span></label>
-      <input type="text" ng-model="room" placeholder="e.g. B-204" />
+      <select ng-model="selectedRoom" ng-options="r.roomNo for r in rooms | filter:{hostelId: selectedHostel._id}">
+        <option value="">-- Select Room --</option>
+      </select>
     </div>
     <div class="form-group">
       <label>Password (locked to your SAP ID)</label>

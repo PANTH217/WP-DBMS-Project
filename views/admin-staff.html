@@ -1,0 +1,81 @@
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h2>Manage Maintenance Staff</h2>
+    <p>Recruit and manage your team of technicians.</p>
+  </div>
+  <button ng-click="refresh()" class="btn btn-outline btn-small">Sync</button>
+</div>
+
+
+<div class="stat-row" style="margin-bottom: 30px;">
+  <div class="stat-card" style="flex:1;">
+    <div class="stat-card-info">
+      <div class="stat-label">Total Recruited Staff</div>
+      <div class="stat-num">{{staff.length}}</div>
+      <p style="font-size: 12px; color: #64748b; margin-top: 10px;">
+        Active technicians available for assignment.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="content-card" style="max-width: 900px; margin-bottom: 30px;">
+  <div class="content-card-header">
+    <h3>Staff Recruitment (Registration)</h3>
+  </div>
+  <div style="padding: 24px; display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 15px; align-items: end;">
+    <div class="form-group" style="margin: 0;">
+      <label>Staff name</label>
+      <input type="text" ng-model="newStaff.name" placeholder="Full Name" style="width: 100%; padding: 10px;">
+    </div>
+    <div class="form-group" style="margin: 0;">
+      <label>Phone Number</label>
+      <input type="text" ng-model="newStaff.phone" placeholder="9876543210" style="width: 100%; padding: 10px;">
+    </div>
+    <div class="form-group" style="margin: 0;">
+      <label>Specialization</label>
+      <select ng-model="newStaff.specialization" style="width: 100%; padding: 10px;">
+        <option value="">Select Category</option>
+        <option ng-repeat="cat in categories" value="{{cat.name}}">{{cat.name}}</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" ng-click="addStaff()" style="padding: 10px 30px;">Recruit Staff</button>
+  </div>
+</div>
+
+<div class="content-card" style="max-width: 900px;">
+  <div class="content-card-header">
+    <h3>Staff Directory</h3>
+  </div>
+  <div class="data-table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Full Name</th>
+          <th>Phone Number</th>
+          <th>Specialization</th>
+          <th>Avg Rating</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="s in staff">
+          <td><strong>{{s.name}}</strong></td>
+          <td>{{s.phone}}</td>
+          <td><span class="badge" style="background:#f1f5f9; color:#475569;">{{s.specialization}}</span></td>
+          <td style="font-weight: bold; color: #4361ee;">
+            {{s.avgRating}} <span ng-if="s.avgRating !== 'N/A'"></span>
+          </td>
+          <td>
+            <button class="btn btn-small btn-outline" style="color: #ef4444; border-color: #fecaca;" ng-click="removeStaff(s._id)">
+              Remove
+            </button>
+          </td>
+        </tr>
+        <tr ng-if="staff.length === 0">
+          <td colspan="4" style="text-align: center; color: #888; padding: 30px;">No staff registered in the system.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
